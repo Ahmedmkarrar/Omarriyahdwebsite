@@ -14,7 +14,7 @@ interface AnimatedSectionProps {
 }
 
 const getVariants = (direction: string): Variants => {
-  const directions: Record<string, { initial: object; animate: object }> = {
+  const directions: Record<string, Variants> = {
     up: {
       initial: { opacity: 0, y: 40 },
       animate: { opacity: 1, y: 0 },
