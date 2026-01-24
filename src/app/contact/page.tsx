@@ -57,13 +57,16 @@ export default function ContactPage() {
     setFormStatus("submitting");
 
     try {
-      const form = e.currentTarget;
-      const data = new FormData(form);
-
-      const response = await fetch("/", {
+      const response = await fetch("/__forms.html", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(data as unknown as Record<string, string>).toString(),
+        body: new URLSearchParams({
+          "form-name": "lead-capture",
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: "New Lead from Omar Riyad Website",
+        }).toString(),
       });
 
       if (response.ok) {
