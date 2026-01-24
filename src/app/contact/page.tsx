@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Phone, Mail, MapPin, Clock, Linkedin, Facebook, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Linkedin, Facebook, ArrowRight, User, Send, CheckCircle } from "lucide-react";
 import { FaTiktok } from "react-icons/fa";
 import { AnimatedSection } from "@/components/ui/custom/AnimatedSection";
 
@@ -44,6 +45,45 @@ const contactMethods = [
 ];
 
 export default function ContactPage() {
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormStatus("submitting");
+
+    try {
+      const form = e.currentTarget;
+      const data = new FormData(form);
+
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams(data as unknown as Record<string, string>).toString(),
+      });
+
+      if (response.ok) {
+        setFormStatus("success");
+        setFormData({ name: "", email: "", phone: "" });
+      } else {
+        setFormStatus("error");
+      }
+    } catch {
+      setFormStatus("error");
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -79,72 +119,236 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Methods Section */}
+      {/* Lead Capture Form Section */}
       <section className="section-padding bg-cream">
         <div className="container-luxury">
-          <AnimatedSection className="text-center mb-16">
-            <span className="inline-block text-xs tracking-[0.3em] uppercase text-gold mb-4">
-              Reach Out
-            </span>
-            <h2 className="text-navy mb-6" style={{ fontFamily: "var(--font-serif)" }}>
-              Ways to Connect
-            </h2>
-            <div className="section-divider mx-auto" />
-          </AnimatedSection>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            {contactMethods.map((method, index) => (
-              <AnimatedSection key={method.title} delay={index * 0.1}>
-                {method.href ? (
-                  <a
-                    href={method.href}
-                    target={method.href.startsWith("http") ? "_blank" : undefined}
-                    rel={method.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="block card-luxury p-8 text-center h-full hover:border-gold/30 transition-all duration-300 group"
-                  >
-                    <div className="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold/10 transition-colors">
-                      <method.icon className="w-7 h-7 text-gold" />
-                    </div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">
-                      {method.title}
-                    </p>
-                    <p className="text-xl text-navy font-medium mb-2" style={{ fontFamily: "var(--font-serif)" }}>
-                      {method.value}
-                    </p>
-                    <p className="text-sm text-gray-500">{method.description}</p>
-                  </a>
-                ) : (
-                  <div className="card-luxury p-8 text-center h-full">
-                    <div className="w-16 h-16 mx-auto mb-6 rounded-full border border-gold/30 flex items-center justify-center">
-                      <method.icon className="w-7 h-7 text-gold" />
-                    </div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-2">
-                      {method.title}
-                    </p>
-                    <p className="text-xl text-navy font-medium mb-2" style={{ fontFamily: "var(--font-serif)" }}>
-                      {method.value}
-                    </p>
-                    <p className="text-sm text-gray-500">{method.description}</p>
-                  </div>
-                )}
-              </AnimatedSection>
-            ))}
-          </div>
-
-          {/* Main CTA */}
-          <AnimatedSection className="text-center">
-            <a href="tel:+18052683615" className="btn-luxury-primary inline-flex">
-              <span className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                Call Omar Now
-                <ArrowRight className="w-4 h-4" />
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            {/* Left Column - Form */}
+            <AnimatedSection direction="left">
+              <span className="inline-block text-xs tracking-[0.3em] uppercase text-gold mb-4">
+                Get Started
               </span>
-            </a>
-          </AnimatedSection>
+              <h2 className="text-navy mb-6" style={{ fontFamily: "var(--font-serif)" }}>
+                Request a Consultation
+              </h2>
+              <div className="w-24 h-0.5 bg-gradient-to-r from-gold to-transparent mb-8" />
+              <p className="text-gray-600 mb-8">
+                Fill out the form below and Omar will personally reach out to discuss
+                your real estate needs.
+              </p>
+
+              {formStatus === "success" ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-green-50 border border-green-200 rounded-sm p-8 text-center"
+                >
+                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl text-navy mb-2" style={{ fontFamily: "var(--font-serif)" }}>
+                    Thank You!
+                  </h3>
+                  <p className="text-gray-600">
+                    Your information has been received. Omar will contact you shortly.
+                  </p>
+                </motion.div>
+              ) : (
+                <form
+                  name="lead-capture"
+                  method="POST"
+                  data-netlify="true"
+                  netlify-honeypot="bot-field"
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
+                  {/* Hidden fields for Netlify */}
+                  <input type="hidden" name="form-name" value="lead-capture" />
+                  <input type="hidden" name="subject" value="New Lead from Omar Riyad Website" />
+                  <p className="hidden">
+                    <label>
+                      Don&apos;t fill this out: <input name="bot-field" />
+                    </label>
+                  </p>
+
+                  {/* Name Field */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name *
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Your full name"
+                        className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all duration-300 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email Field */}
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address *
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="your@email.com"
+                        className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all duration-300 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone Field */}
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number *
+                    </label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        required
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="(805) 555-1234"
+                        className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-sm focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-all duration-300 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={formStatus === "submitting"}
+                    className="w-full btn-luxury-primary justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    <span className="flex items-center gap-2">
+                      {formStatus === "submitting" ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                              fill="none"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Submit Request
+                        </>
+                      )}
+                    </span>
+                  </button>
+
+                  {formStatus === "error" && (
+                    <p className="text-red-500 text-sm text-center">
+                      Something went wrong. Please try again or call Omar directly.
+                    </p>
+                  )}
+                </form>
+              )}
+            </AnimatedSection>
+
+            {/* Right Column - Contact Methods */}
+            <AnimatedSection direction="right" delay={0.2}>
+              <span className="inline-block text-xs tracking-[0.3em] uppercase text-gold mb-4">
+                Or Reach Out Directly
+              </span>
+              <h2 className="text-navy mb-6" style={{ fontFamily: "var(--font-serif)" }}>
+                Contact Information
+              </h2>
+              <div className="w-24 h-0.5 bg-gradient-to-r from-gold to-transparent mb-8" />
+
+              <div className="space-y-4 mb-10">
+                {contactMethods.map((method) => (
+                  method.href ? (
+                    <a
+                      key={method.title}
+                      href={method.href}
+                      target={method.href.startsWith("http") ? "_blank" : undefined}
+                      rel={method.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="flex items-center gap-4 p-4 bg-white rounded-sm border border-gray-100 hover:border-gold/30 transition-all duration-300 group"
+                    >
+                      <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold/10 transition-colors">
+                        <method.icon className="w-5 h-5 text-gold" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                          {method.title}
+                        </p>
+                        <p className="text-navy font-medium">{method.value}</p>
+                        <p className="text-sm text-gray-500">{method.description}</p>
+                      </div>
+                    </a>
+                  ) : (
+                    <div
+                      key={method.title}
+                      className="flex items-center gap-4 p-4 bg-white rounded-sm border border-gray-100"
+                    >
+                      <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center">
+                        <method.icon className="w-5 h-5 text-gold" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
+                          {method.title}
+                        </p>
+                        <p className="text-navy font-medium">{method.value}</p>
+                        <p className="text-sm text-gray-500">{method.description}</p>
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+
+              {/* Social Links */}
+              <div className="bg-navy/5 rounded-sm p-6">
+                <p className="text-gray-600 text-sm mb-4">Follow Omar on Social Media</p>
+                <div className="flex items-center gap-4">
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.name}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-12 h-12 rounded-full border border-navy/20 flex items-center justify-center text-navy/60 hover:border-gold hover:text-gold hover:bg-gold/10 transition-all duration-300"
+                      aria-label={`Follow Omar on ${social.name}`}
+                    >
+                      <social.icon className="w-5 h-5" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </AnimatedSection>
+          </div>
         </div>
       </section>
 
-      {/* Message Section */}
+      {/* Why Work With Omar Section */}
       <section className="section-padding bg-navy relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 opacity-10">
@@ -158,27 +362,21 @@ export default function ContactPage() {
         </div>
 
         <div className="container-luxury relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Column - Message */}
-            <AnimatedSection direction="left">
+          <div className="max-w-3xl mx-auto text-center">
+            <AnimatedSection>
               <span className="inline-block text-xs tracking-[0.3em] uppercase text-gold mb-4">
                 Personal Service
               </span>
               <h2 className="text-white mb-6" style={{ fontFamily: "var(--font-serif)" }}>
                 Why Work With Omar?
               </h2>
-              <div className="w-24 h-0.5 bg-gradient-to-r from-gold to-transparent mb-8" />
+              <div className="w-24 h-0.5 bg-gradient-to-r from-gold to-transparent mb-8 mx-auto" />
 
-              <div className="space-y-6 text-white/70 leading-relaxed">
+              <div className="space-y-6 text-white/70 leading-relaxed text-lg">
                 <p>
                   When you reach out to Omar, you&apos;re not getting a call center or an
                   assistant—you&apos;re connecting directly with a dedicated real estate
                   professional who treats every client like family.
-                </p>
-                <p>
-                  Whether you&apos;re a first-time buyer, a seasoned investor, or looking
-                  to sell your luxury property, Omar provides the personalized attention
-                  and market expertise that sets him apart.
                 </p>
                 <p>
                   With over $100 million in transactions and 100+ properties sold,
@@ -188,67 +386,10 @@ export default function ContactPage() {
               </div>
 
               {/* License Info */}
-              <div className="mt-8 pt-8 border-t border-white/10">
+              <div className="mt-10 pt-8 border-t border-white/10">
                 <p className="text-white/40 text-sm">
                   DRE License #02052562 | Revel Real Estate
                 </p>
-              </div>
-            </AnimatedSection>
-
-            {/* Right Column - Social & Quick Contact */}
-            <AnimatedSection direction="right" delay={0.2}>
-              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-sm p-10">
-                <h3 className="text-white text-2xl mb-8" style={{ fontFamily: "var(--font-serif)" }}>
-                  Connect With Omar
-                </h3>
-
-                {/* Quick Contact */}
-                <div className="space-y-4 mb-10">
-                  <a
-                    href="tel:+18052683615"
-                    className="flex items-center gap-4 p-4 bg-white/5 rounded-sm text-white/80 hover:text-gold hover:bg-white/10 transition-all duration-300 group"
-                  >
-                    <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold/10 transition-colors">
-                      <Phone className="w-5 h-5 text-gold" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Phone</p>
-                      <p className="text-lg font-medium">805.268.3615</p>
-                    </div>
-                  </a>
-
-                  <a
-                    href="mailto:omar@revelrealestate.com"
-                    className="flex items-center gap-4 p-4 bg-white/5 rounded-sm text-white/80 hover:text-gold hover:bg-white/10 transition-all duration-300 group"
-                  >
-                    <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center group-hover:bg-gold/10 transition-colors">
-                      <Mail className="w-5 h-5 text-gold" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Email</p>
-                      <p className="text-lg font-medium">omar@revelrealestate.com</p>
-                    </div>
-                  </a>
-                </div>
-
-                {/* Social Links */}
-                <div>
-                  <p className="text-white/50 text-sm mb-4">Follow Omar on Social Media</p>
-                  <div className="flex items-center gap-4">
-                    {socialLinks.map((social) => (
-                      <a
-                        key={social.name}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white/60 hover:border-gold hover:text-gold hover:bg-gold/10 transition-all duration-300"
-                        aria-label={`Follow Omar on ${social.name}`}
-                      >
-                        <social.icon className="w-5 h-5" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
               </div>
             </AnimatedSection>
           </div>
