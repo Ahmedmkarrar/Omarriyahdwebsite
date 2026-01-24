@@ -144,7 +144,7 @@ export function Hero() {
           >
             <div className="flex items-center gap-2">
               <span className="text-gold">✦</span>
-              <span>7 Years of Excellence</span>
+              <span>15 Years of Excellence</span>
             </div>
           </motion.div>
         </motion.div>

@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     template: "%s | Omar Riyad Real Estate",
   },
   description:
-    "Elite real estate advisor specializing in luxury residential and commercial properties in Montecito, Beverly Hills, and Central Coast California markets. Over $100M in sales with 10+ years of experience.",
+    "Elite real estate advisor specializing in luxury residential and commercial properties in Montecito, Beverly Hills, and Central Coast California markets. Over $100M in sales with 15+ years of experience.",
   keywords: [
     "luxury real estate",
     "Montecito homes",
@@ -147,7 +147,7 @@ const jsonLd = {
     "https://www.facebook.com/omarriyad",
   ],
   description:
-    "Elite real estate advisor with 10+ years experience specializing in luxury residential and commercial properties in California's most prestigious markets.",
+    "Elite real estate advisor with 15+ years experience specializing in luxury residential and commercial properties in California's most prestigious markets.",
   knowsAbout: [
     "Luxury Real Estate",
     "Commercial Real Estate",

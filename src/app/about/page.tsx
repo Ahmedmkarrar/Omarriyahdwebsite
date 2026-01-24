@@ -182,7 +182,7 @@ export default function AboutPage() {
                 >
                   <div className="text-center">
                     <span className="block text-3xl font-light text-navy" style={{ fontFamily: "var(--font-serif)" }}>
-                      7
+                      15
                     </span>
                     <span className="text-xs tracking-[0.2em] uppercase text-gold">
                       Years of Excellence
